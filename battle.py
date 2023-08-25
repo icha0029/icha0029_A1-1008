@@ -29,9 +29,11 @@ class Battle:
         * remove fainted monsters and retrieve new ones.
         * return the battle result if completed.
         """
+        #Gets actions for both teams
         action_team_1 = self.team1.choose_action(self.out1, self.out2)
         action_team_2 = self.team2.choose_action(self.out2, self.out1)
 
+        #Completes team 1 action if its not an attack
         if action_team_1 != Battle.Action.ATTACK:
             self.team1.add_to_team(self.out1)
             if action_team_1 == Battle.Action.SPECIAL:
@@ -41,7 +43,7 @@ class Battle:
         else:
             team_1_attack = True
 
-
+        #Completes team 2 action if its not an attack
         if action_team_2 != Battle.Action.ATTACK:
             self.team2.add_to_team(self.out2)
             if action_team_2 == Battle.Action.SPECIAL:
@@ -51,31 +53,36 @@ class Battle:
         else:
             team_2_attack = True
 
+        #Checks if any monsters chose to attack
         if team_1_attack or team_2_attack:
             speed_1 = self.out1.get_speed()
             speed_2 = self.out2.get_speed()
 
+        #checks if monster 1 is faster than monster 2, then monster 1 attacks first. Also monster 2 can retaliate
             if speed_1 > speed_2:
                 self.out1.attack(self.out2)
                 if self.out2.alive() and team_2_attack:
                     self.out2.attack(self.out1)
-            
+
+        #checks if monster 2 is faster than monster 1, then monster 2 attacks first. Also monster 1 can retaliate
             elif speed_2 > speed_1:
                 self.out2.attack(self.out1)
                 if self.out1.alive() and team_1_attack:
                     self.out1.attack(self.out2)
-            
+        #Both monsters attack each other    
             else:
                 self.out1.attack(self.out2)
                 self.out2.attack(self.out1)
-
+        #If both monsters after using each others actions and survive then reduce 1 from there hp.
         if self.out1.alive() and self.out2.alive():
             self.out1.set_hp(self.out1.get_hp() - 1)
             self.out2.set_hp(self.out2.get_hp() - 1)
 
+        #checks if both monsters are still alive
         if self.out1.alive() and self.out2.alive():
             return None
-        
+
+        #Does a retreiveing and end of game checks     
         elif self.out1.dead() and self.out2.dead():
             if len(self.team1) > 0:
                 if len(self.team2) > 0:
@@ -87,16 +94,18 @@ class Battle:
                 if len(self.team2) > 0:
                     return self.Result.TEAM2
                 return self.Result.DRAW
-
+        #Does a retreiveing and end of game checks and evolution check.     
         elif self.out1.alive() and self.out2.dead():
             if len(self.team2) == 0:
                 return self.Result.TEAM1
             self.out2 = self.team2.retrieve_from_team()
+        
 
             self.out1.level_up()
             if self.out1.ready_to_evolve():
                 self.out1 = self.out1.evolve()
 
+        #Does a retreiveing and end of game checks and evolution check.     
         elif self.out1.dead() and self.out2.alive():
             if len(self.team1) == 0:
                 return self.Result.TEAM2
@@ -105,6 +114,7 @@ class Battle:
             self.out2.level_up()
             if self.out2.ready_to_evolve():
                 self.out2 = self.out2.evolve()
+    
 
 
         

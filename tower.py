@@ -20,11 +20,18 @@ class BattleTower:
         self.my_remaining_lifeforce = None
         self.enemy_capacity = None
         self.enemy_teams_stack = None
+        """
+        As it is self initialisation the best and worse case complexity is O(1)
+        """
 
     def set_my_team(self, team: MonsterTeam) -> None:
         # Generate the team lives here too.
         self.my_team = team
         self.my_remaining_lifeforce = RandomGen.randint(self.MIN_LIVES, self.MAX_LIVES)
+        """
+        This sets my team to the inputted team, and randomly generates the number of lives we have between a min and max value
+        best and worse complexity is O(1) for random and and assignment of value of input
+        """       
 
     def generate_teams(self, n: int) -> None:
         self.enemy_capacity = n
@@ -36,9 +43,23 @@ class BattleTower:
             opposing_team_tuple = (opposing_team , enemy_remaining_lifeforce)
             self.enemy_teams_stack.push(opposing_team_tuple)
         self.flip_stack(self.enemy_teams_stack)
+        """
+        I am creating a stack for the required input capacity. 
+        The FOR loop creates each enemy teams their amount of lives, then we put it in a tuple.
+        and add it to the stack as a tuple so we have both pieces of information together
+        Then in the end we flip the stack so its the first item we added.
+        So the best and worst case is O(Enemy_Stack) + O(Capacity x (TEAM_Creator)) + O(Capacity) + O(Enemy_Stack) 
+                                        = O(Enemy_Stack) + O(Capacity x (TEAM_Creator)), 
+                                        team creator = complexity of creating enemy team
+
+        """     
 
     def battles_remaining(self) -> bool:
         return self.my_remaining_lifeforce > 0 and len(self.enemy_teams_stack) > 0
+        """
+        This checks if my_team has any lives left and that there are enemy teams left 
+        complexity is O(1)
+        """
 
 
     def next_battle(self) -> tuple[Battle.Result, MonsterTeam, MonsterTeam, int, int]:
@@ -60,6 +81,23 @@ class BattleTower:
         self.flip_stack(self.enemy_teams_stack)
 
         return (battle_outcome , self.my_team , enemy_team , self.my_remaining_lifeforce , enemy_remaining_lifeforce)
+        """
+        First thing I am doing is regenerating both teams. 
+        Which has a complexity of O(Regeneration), Regeneration = complexity
+
+        Next thing we do is battle between my team and enemy time. 
+        So the complexity function is O(Fight_Begins), Fight_Begins = complexity of the battle function
+
+        The IF statements have a complexity of O(Final_Comparison), 
+        Final_Comparison = complexity of the comparison of battle.result function
+
+        Then I call upon flip stack which has a complexity best and worst case is O(Capacity + Enemy_Stack)
+
+        Then i call upon flip stack again.
+
+        Complexity overall is O(Regeneration) + O(Regeneration) + O(Fight_Begins) + O(Final_Comparison) + O(Capacity + Enemy_Stack) + O(Capacity + Enemy_Stack)
+                                = O(Regeneration + Fight_Begins + Final_Comparison + Capacity + Enemy_Stack)
+        """
 
     def out_of_meta(self) -> ArrayR[Element]:
         raise NotImplementedError
@@ -70,6 +108,13 @@ class BattleTower:
             team = team_stack.pop()
             new_stack.push(team)
         self.enemy_teams_stack = new_stack
+        """
+        This creates a new stack with the required capacity. So the complexity is O(Capacity)
+        The WHILE loop runs until we take each elemnt out of the enemy team and add it to a stack 
+        so the order is reversed when we are dequeuing the monster at the front
+        Complexity of while loop is O(Enemy_Stack), Enemy_Stack = len(self.enemy_teams_stack)
+        So overall complexity best and worst case is O(Capacity + Enemy_Stack)
+        """     
         
 
 

@@ -111,6 +111,7 @@ class ComplexStats(Stats):
                 removed_ii = final_stack.pop()
                 removed_iii = final_stack.pop()
 
+                #This is checking which number is in the middle
                 if removed_ii <= removed_i <= removed_iii or removed_iii <= removed_i <= removed_ii:
                     final_stack.push(removed_i)
                 if removed_i <= removed_ii <= removed_iii or removed_iii <= removed_ii <= removed_i:
@@ -119,3 +120,15 @@ class ComplexStats(Stats):
                      final_stack.push(removed_iii)                   
         return int(final_stack.pop())
 
+
+
+        """
+        z represents the length of formula
+        First I am creating a stack which has complexity of O(z). Then the FOR loop runs the FORMULA, z times.
+        Inside the loop we have the checks first we are checking is_numeric which has an unknown complexity.
+        Except for the else, we have a string_comparison complexity. 
+        If it is numeric we apply it as a float on a number.
+        If it is level we add a level
+        For everything else we take it out use relevant mathematical operations and then put it back in.
+        In the end we return the float converted to an integer. 
+        """
