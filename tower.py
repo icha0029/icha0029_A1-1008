@@ -7,6 +7,7 @@ from battle import Battle
 from elements import Element
 
 from data_structures.referential_array import ArrayR
+from data_structures.stack_adt import *
 
 class BattleTower:
 
@@ -15,22 +16,62 @@ class BattleTower:
 
     def __init__(self, battle: Battle|None=None) -> None:
         self.battle = battle or Battle(verbosity=0)
+        self.my_team = None
+        self.my_remaining_lifeforce = None
+        self.enemy_capacity = None
+        self.enemy_teams_stack = None
 
     def set_my_team(self, team: MonsterTeam) -> None:
         # Generate the team lives here too.
-        raise NotImplementedError
+        self.my_team = team
+        self.my_remaining_lifeforce = RandomGen.randint(self.MIN_LIVES, self.MAX_LIVES)
 
     def generate_teams(self, n: int) -> None:
-        raise NotImplementedError
+        self.enemy_capacity = n
+        self.enemy_teams_stack = ArrayStack(n)
+        for _ in range(n):
+            opposing_team = MonsterTeam(team_mode = MonsterTeam.TeamMode.BACK, selection_mode = MonsterTeam.SelectionMode.RANDOM)
+            enemy_remaining_lifeforce = RandomGen.randint(self.MIN_LIVES, self.MAX_LIVES)
+
+            opposing_team_tuple = (opposing_team , enemy_remaining_lifeforce)
+            self.enemy_teams_stack.push(opposing_team_tuple)
+        self.flip_stack(self.enemy_teams_stack)
 
     def battles_remaining(self) -> bool:
-        raise NotImplementedError
+        return self.my_remaining_lifeforce > 0 and len(self.enemy_teams_stack) > 0
+
 
     def next_battle(self) -> tuple[Battle.Result, MonsterTeam, MonsterTeam, int, int]:
-        raise NotImplementedError
+        self.my_team.regenerate_team()
+        enemy_team, enemy_remaining_lifeforce = self.enemy_teams_stack.pop()
+        enemy_team.regenerate_team()
+        battle_outcome = self.battle.battle(self.my_team, enemy_team)
+        if battle_outcome == Battle.Result.TEAM1:
+            enemy_remaining_lifeforce -=1
+        elif battle_outcome == Battle.Result.TEAM2:
+            self.my_remaining_lifeforce -=1
+        else:
+            enemy_remaining_lifeforce -=1
+            self.my_remaining_lifeforce -=1
+        
+        self.flip_stack(self.enemy_teams_stack)
+        if enemy_remaining_lifeforce > 0:
+            self.enemy_teams_stack.push((enemy_team , enemy_remaining_lifeforce))
+        self.flip_stack(self.enemy_teams_stack)
+
+        return (battle_outcome , self.my_team , enemy_team , self.my_remaining_lifeforce , enemy_remaining_lifeforce)
 
     def out_of_meta(self) -> ArrayR[Element]:
         raise NotImplementedError
+
+    def flip_stack(self, team_stack):
+        new_stack = ArrayStack(self.enemy_capacity)
+        while len(self.enemy_teams_stack):
+            team = team_stack.pop()
+            new_stack.push(team)
+        self.enemy_teams_stack = new_stack
+        
+
 
     def sort_by_lives(self):
         # 1054 ONLY

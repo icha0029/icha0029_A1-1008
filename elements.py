@@ -38,13 +38,23 @@ class Element(BaseEnum):
     FAIRY = auto()
     DARK = auto()
     STEEL = auto()
-
+    
+    """
+    Complexity Analysis and Explaination FOR FROM_STRING...
+    Which then calculated an index to access the matching effectivness value in the damage_effectiveness_aray and returns it.
+    So to start the complexity analysis of from_string can be represented as let g represent the string comparisons.
+    Also let p represent the number of iterations. 
+    So therefore the best case would be the case in which the first element is string we are searching for so O(G)
+    But the worst case would be the case that the last element is the string we are after so its O(G x P) as the loop would rerun P times.
+    """
     @classmethod
     def from_string(cls, string: str) -> Element:
         for elem in Element:
             if elem.name.lower() == string.lower():
                 return elem
         raise ValueError(f"Unexpected string {string}")
+
+
 
 class EffectivenessCalculator:
     """
@@ -74,8 +84,17 @@ class EffectivenessCalculator:
         Fire is half effective to Fire and Water, and double effective to Grass [0.5, 0.5, 2]
         Water is double effective to Fire, and half effective to Water and Grass [2, 0.5, 0.5]
         Grass is half effective to Fire and Grass, and double effective to Water [0.5, 2, 0.5]
+        
+        
+
+
+        Complexity Analysis and Explanation used for initialisation...
+        The effectiveness calculator initializes two arrays elemental_names and damage_effectiveness. 
+        These operations are performed in the constant time since they involve assigning values to arrays. 
+        Therefore, the best and worst case complexity is 0(1)
         """
-        raise NotImplementedError
+        self.elemental_names = element_names
+        self.damage_effectiveness = effectiveness_values
 
     @classmethod
     def get_effectiveness(cls, type1: Element, type2: Element) -> float:
@@ -83,8 +102,35 @@ class EffectivenessCalculator:
         Returns the effectivness of elem1 attacking elem2.
 
         Example: EffectivenessCalculator.get_effectiveness(Element.FIRE, Element.WATER) == 0.5
+
+
+        Complexity Analysis and Explaination...
+        FOR GET_EFFECTIVENESS
+        Also let p represent the number of loop runs but it also represents the numbers of elements in the array. 
+        Also for element comparison represent that as Elem_Comp
+        So for best case it would be that the type 1 and type 2 are found first to cut/break of the loop quickly. 
+        So the complexity for that would be O(G + Elem_Comp)
+        So for worst case it would that the type 1 and type 2 are last to be found in the array
+        O(G + Elem_Comp) x O(P)
+
+
+
         """
-        raise NotImplementedError
+        index_1 = None
+        index_2 = None
+        for elemental_index in range(len(cls.instance.elemental_names)): #Iterating through element names
+            element = Element.from_string(cls.instance.elemental_names[elemental_index])#Converts into element format
+            if index_1 == None and type1 == element: #Checking if index_1 hasn't been asigned a value and type_1 is an element we are after
+                index_1 = elemental_index
+            if index_2 == None and type2 == element: #Checking if index_2 hasn't been asigned a value and type_2 is an element we are after
+                index_2 = elemental_index
+            if index_1 != None and index_2 != None: #Breaking if index_1 has a value and index_2 has a value.
+                break
+
+        idx_to_search = index_1 * len(cls.instance.elemental_names) + index_2 #Using a formula to get the index from the elemental values 
+
+        return cls.instance.damage_effectiveness[idx_to_search] #Returns damage effectiveness
+
 
     @classmethod
     def from_csv(cls, csv_file: str) -> EffectivenessCalculator:
